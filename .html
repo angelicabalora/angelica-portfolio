@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #06004d;
+        }
+        button {
+            background-color: #06004d;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #06004d;
+            color: white;
+        }
+        .action-btn {
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+        .view-btn { background: #2196F3; color: white; }
+        .edit-btn { background: #FFC107; color: black; }
+        .delete-btn { background: #F44336; color: white; }
+        .hidden { display: none; }
+        .form-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>STUDENT RECORDS</h2>
+        <button onclick="openForm()">Add New Student</button>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>BIRTHDATE</th>
+                    <th>PLACE</th>
+                    <th>PHONE</th>
+                    <th>NATIONALITY</th>
+                    <th>RELIGION</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody id="student-table">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="studentForm" class="form-popup hidden">
+        <h3 id="formTitle">Add Student</h3>
+        <input type="hidden" id="editIndex">
+        <label>ID:</label>
+        <input type="text" id="id" required><br><br>
+        <label>Name:</label>
+        <input type="text" id="name" required><br><br>
+        <label>Birthdate:</label>
+        <input type="date" id="birthdate" required><br><br>
+        <label>Place:</label>
+        <input type="text" id="place" required><br><br>
+        <label>Phone:</label>
+        <input type="text" id="phone" required><br><br>
+        <label>Nationality:</label>
+        <input type="text" id="nationality" required><br><br>
+        <label>Religion:</label>
+        <input type="text" id="religion" required><br><br>
+        <button onclick="saveStudent()">Save</button>
+        <button onclick="closeForm()">Cancel</button>
+    </div>
+
+    <div id="viewStudentPopup" class="form-popup hidden">
+        <h3>Student Details</h3>
+        <p id="viewDetails"></p>
+        <button onclick="closeView()">Close</button>
+    </div>
+
+    <script>
+      const deletePassword = "accessgranted";
+        function openForm(index = null) {
+            document.getElementById("studentForm").classList.remove("hidden");
+            if (index !== null) {
+                document.getElementById("formTitle").innerText = "Edit Student";
+                document.getElementById("editIndex").value = index;
+                let row = document.getElementById("student-table").rows[index];
+                document.getElementById("id").value = row.cells[0].innerText;
+                document.getElementById("name").value = row.cells[1].innerText;
+                document.getElementById("birthdate").value = row.cells[2].innerText;
+                document.getElementById("place").value = row.cells[3].innerText;
+                document.getElementById("phone").value = row.cells[4].innerText;
+                document.getElementById("nationality").value = row.cells[5].innerText;
+                document.getElementById("religion").value = row.cells[6].innerText;
+            }
+        }
+
+        function closeForm() {
+            document.getElementById("studentForm").classList.add("hidden");
+        }
+
+        function saveStudent() {
+            let index = document.getElementById("editIndex").value;
+            let id = document.getElementById("id").value;
+            let name = document.getElementById("name").value;
+            let birthdate = document.getElementById("birthdate").value;
+            let place = document.getElementById("place").value;
+            let phone = document.getElementById("phone").value;
+            let nationality = document.getElementById("nationality").value;
+            let religion = document.getElementById("religion").value;
+
+            let table = document.getElementById("student-table");
+
+            if (index) {
+                let row = table.rows[index];
+                row.innerHTML = generateRow(id, name, birthdate, place, phone, nationality, religion, index);
+            } else {
+                let row = table.insertRow();
+                let rowIndex = table.rows.length - 1;
+                row.innerHTML = generateRow(id, name, birthdate, place, phone, nationality, religion, rowIndex);
+            }
+            closeForm();
+        }
+
+        function generateRow(id, name, birthdate, place, phone, nationality, religion, index) {
+            return `<td>${id}</td><td>${name}</td><td>${birthdate}</td><td>${place}</td><td>${phone}</td><td>${nationality}</td><td>${religion}</td><td>
+                <button class="view-btn" onclick="viewStudent(${index})">View</button>
+                <button class="edit-btn" onclick="openForm(${index})">Edit</button>
+                <button class="delete-btn" onclick="deleteStudent(${index})">Delete</button>
+            </td>`;
+        }
+
+        function viewStudent(index) {
+            let row = document.getElementById("student-table").rows[index];
+            let details = `
+                <strong>ID:</strong> ${row.cells[0].innerText}<br>
+                <strong>Name:</strong> ${row.cells[1].innerText}<br>
+                <strong>Birthdate:</strong> ${row.cells[2].innerText}<br>
+                <strong>Place:</strong> ${row.cells[3].innerText}<br>
+                <strong>Phone:</strong> ${row.cells[4].innerText}<br>
+                <strong>Nationality:</strong> ${row.cells[5].innerText}<br>
+                <strong>Religion:</strong> ${row.cells[6].innerText}
+            `;
+            document.getElementById("viewDetails").innerHTML = details;
+            document.getElementById("viewStudentPopup").classList.remove("hidden");
+        }
+
+        function closeView() {
+            document.getElementById("viewStudentPopup").classList.add("hidden");
+        }
+
+        function deleteStudent(index) {
+            document.getElementById("student-table").deleteRow(index);
+        }
+
+
+        function deleteStudent(index) {
+            let password = prompt("Enter the password to delete:");
+            if (password === deletePassword) {
+                document.getElementById("student-table").deleteRow(index);
+            } else {
+                alert("Incorrect password. Deletion canceled.");
+            }
+        }
+        
+    </script>
+</body>
+</html>
